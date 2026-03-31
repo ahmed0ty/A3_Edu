@@ -1,19 +1,3 @@
-// // src/utils/cacheKeys.js
-
-// // كورسات
-// export const coursesKey = (page = 1, limit = 20) => `courses:page=${page}:limit=${limit}`;
-// export const courseKey = (courseId) => `course:${courseId}`;
-// export const myCoursesKey = (studentId) => `myCourses:${studentId}`;
-// // دروس
-// export const lessonsKey = (courseId, page = 1, limit = 20) => `lessons:course=${courseId}:page=${page}:limit=${limit}`;
-// export const lessonKey = (lessonId) => `lesson:${lessonId}`;
-
-// // كويزات
-// export const courseQuizzesKey = (courseId, page = 1, limit = 20) => `quizzes:course=${courseId}:page=${page}:limit=${limit}`;
-// export const quizKey = (quizId) => `quiz:${quizId}`;
-
-// // نتائج الكويز
-// export const quizResultsKey = (quizId) => `quizResults:${quizId}`;
 
 // ================= PREFIXES =================
 export const COURSES_PREFIX = "courses:";
