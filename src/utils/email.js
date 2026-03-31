@@ -52,12 +52,10 @@ const createTransporter = () => {
     },
   });
 };
-
 export const sendEmail = async ({ to, subject, html }) => {
   try {
     const transporter = createTransporter();
 
-    // ❗ لو مفيش credentials → مايبعتش بس مايكسرش
     if (!transporter) {
       return false;
     }
@@ -71,11 +69,8 @@ export const sendEmail = async ({ to, subject, html }) => {
 
     console.log("📨 Email sent:", info.messageId);
     return true;
-
   } catch (error) {
-    // ❗ هنا أهم تعديل → ما نرميش error
     console.error("❌ Email failed but ignored:", error.message);
-
-    return false; // بدل throw
+    return false;
   }
 };

@@ -181,7 +181,6 @@ export const register = async (data, file) => {
   if (emailExist) throw new Error("Email already exists");
 
   const hashPassword = await bcrypt.hash(password, 10);
-
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
   const user = await UserModel.create({
@@ -195,19 +194,13 @@ export const register = async (data, file) => {
     profileImage: file?.path || "",
   });
 
-  try {
-    const emailSent = await sendEmail({
-      to: email,
-      subject: "Confirm your email",
-      html: `<h2>Your OTP is: ${otp}</h2>`,
-    });
-
-    if (!emailSent) {
-      console.warn("⚠️ Confirmation email not sent, but registration completed");
-    }
-  } catch (error) {
-    console.error("❌ Register email error ignored:", error.message);
-  }
+  sendEmail({
+    to: email,
+    subject: "Confirm your email",
+    html: `<h2>Your OTP is: ${otp}</h2>`,
+  }).catch((error) => {
+    console.error("❌ Background email error:", error.message);
+  });
 
   return {
     userId: user._id,
@@ -216,7 +209,6 @@ export const register = async (data, file) => {
     role: user.role,
   };
 };
-
 // ================= CONFIRM EMAIL =================
 export const confirmEmail = async (email, otp) => {
   const user = await UserModel.findOne({ email });
