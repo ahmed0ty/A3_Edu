@@ -89,7 +89,7 @@ export const bootstrap = async () => {
       origin: [
         "http://localhost:5173",
         "http://localhost:3000",
-        "https://a3-edu.onrender.com",
+        "https://a3-edu-front-end.vercel.app/",
       ],
       credentials: true,
     })
