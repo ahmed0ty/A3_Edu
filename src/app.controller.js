@@ -23,7 +23,7 @@ export const bootstrap = async () => {
   // middlewares
   app.use(
     cors({
-      origin: "http://localhost:5173", // الفرونت بتاعك
+      origin: "https://a3-edu.onrender.com", // الفرونت بتاعك
       credentials: true,
     }),
   );
