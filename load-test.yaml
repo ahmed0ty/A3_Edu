@@ -1,0 +1,14 @@
+config:
+  target: "http://localhost:3000"
+  phases:
+    - duration: 30       # مدة الاختبار بالثواني
+      arrivalRate: 5     # 10 مستخدمين جدد كل ثانية
+scenarios:
+  - flow:
+      - post:
+          url: "/auth/login"
+          json:
+            email: "test1@example.com"
+            password: "123456"
+      - get:
+          url: "/courses"
