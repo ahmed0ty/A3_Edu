@@ -1,17 +1,67 @@
+// import nodemailer from "nodemailer";
+// // 👇 حطهم هنا
+// console.log("EMAIL:", process.env.EMAIL);
+// console.log("EMAIL_PASS exists:", !!process.env.EMAIL_PASS);
+// const transporter = nodemailer.createTransport({
+//   service: "gmail",
+//   auth: {
+//     user: process.env.EMAIL,
+//     pass: process.env.EMAIL_PASS,
+//   },
+// });
+
+// export const sendEmail = async ({ to, subject, html }) => {
+//   try {
+//     const info = await transporter.sendMail({
+//       from: `"Edu Platform" <${process.env.EMAIL}>`,
+//       to,
+//       subject,
+//       html,
+//     });
+
+//     console.log("📨 Email sent:", info.messageId);
+    
+//     return true;
+//   } catch (error) {
+//     console.error("❌ Email Error:", error.message);
+//     throw new Error("Failed to send email");
+//   }
+// };
+
+
+
+
+
 import nodemailer from "nodemailer";
-// 👇 حطهم هنا
+
+// debug
 console.log("EMAIL:", process.env.EMAIL);
 console.log("EMAIL_PASS exists:", !!process.env.EMAIL_PASS);
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL,
-    pass: process.env.EMAIL_PASS,
-  },
-});
+
+const createTransporter = () => {
+  if (!process.env.EMAIL || !process.env.EMAIL_PASS) {
+    console.warn("⚠️ Email credentials missing → skipping email sending");
+    return null;
+  }
+
+  return nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.EMAIL,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+};
 
 export const sendEmail = async ({ to, subject, html }) => {
   try {
+    const transporter = createTransporter();
+
+    // ❗ لو مفيش credentials → مايبعتش بس مايكسرش
+    if (!transporter) {
+      return false;
+    }
+
     const info = await transporter.sendMail({
       from: `"Edu Platform" <${process.env.EMAIL}>`,
       to,
@@ -20,10 +70,12 @@ export const sendEmail = async ({ to, subject, html }) => {
     });
 
     console.log("📨 Email sent:", info.messageId);
-    
     return true;
+
   } catch (error) {
-    console.error("❌ Email Error:", error.message);
-    throw new Error("Failed to send email");
+    // ❗ هنا أهم تعديل → ما نرميش error
+    console.error("❌ Email failed but ignored:", error.message);
+
+    return false; // بدل throw
   }
 };
