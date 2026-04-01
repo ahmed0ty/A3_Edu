@@ -82,7 +82,10 @@ import commentRoutes from "./modules/comments/comment.routes.js";
 import { clearCacheByPrefix } from "./utils/cache.js";
 
 export const bootstrap = async () => {
+
+
   const app = express();
+  app.set("trust proxy", 1);
 
   app.use(
     cors({
