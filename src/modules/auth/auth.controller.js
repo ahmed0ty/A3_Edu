@@ -180,6 +180,8 @@ export const requestInstructor = async (req, res, next) => {
 
     // 🔥 لازم صورة
     const file = req.file;
+    console.log("📁 File received:", file?.originalname);
+
 
     if (!file) {
       return res.status(400).json({
