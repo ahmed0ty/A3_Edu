@@ -402,11 +402,7 @@ await clearCacheByPrefix("myCourses:");
 
     const io = getIO();
 
-    io.emit("course:created", {
-      courseId: course._id,
-      title: course.title,
-      instructor: req.user._id,
-    });
+    io.emit("course:created");
 
     res.status(201).json({
       message: "Course created successfully",
