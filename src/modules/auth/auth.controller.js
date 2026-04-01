@@ -268,11 +268,11 @@ export const logout = async (req, res, next) => {
 
 
     // مسح الكوكي بغض النظر لو التوكن موجود أو لا
-    res.clearCookie("refreshToken", {
-      httpOnly: true,
-      secure: false, // خليها true في production
-      sameSite: "lax",
-    });
+  res.clearCookie("refreshToken", {
+  httpOnly: true,
+  secure: true,
+  sameSite: "none",
+});
 
     return res.status(200).json({ message: "Logged out successfully" });
   } catch (error) {

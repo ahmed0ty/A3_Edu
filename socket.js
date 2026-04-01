@@ -5,7 +5,10 @@ let io;
 export const initSocket = (server) => {
 io = new Server(server, {
     cors: {
-      origin: "http://localhost:5173", // ✅ محدد مش wildcard
+      origin: [
+  "http://localhost:5173",
+  "https://a3-edu-front-end.vercel.app",
+],
       methods: ["GET", "POST", "PATCH", "DELETE"],
       credentials: true, // ✅ مهم
     },
