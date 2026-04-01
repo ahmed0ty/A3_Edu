@@ -420,31 +420,16 @@ export const getCourses = async (req, res, next) => {
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 20;
 
-    const cacheKey = coursesKey(page, limit);
-
-    let courses;
-
-    const cachedData = await redis.get(cacheKey);
-
-    if (cachedData) {
-      courses =
-        typeof cachedData === "string" ? JSON.parse(cachedData) : cachedData;
-    } else {
-      courses = await CourseModel.find()
-        .populate("instructor", "name email")
-        .select(
-          "title description instructor price isPublished thumbnail instructorPhone",
-        )
-        .skip((page - 1) * limit)
-        .limit(limit)
-        .lean();
-
-      await redis.set(cacheKey, JSON.stringify(courses), { ex: 300 });
-    }
+    const courses = await CourseModel.find()
+      .populate("instructor", "name email")
+      .select("title description instructor price isPublished thumbnail instructorPhone")
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .lean();
 
     if (!userId) {
       return res.status(200).json({
-        source: cachedData ? "cache" : "db",
+        source: "db",
         data: courses.map((course) => ({
           ...course,
           hasAccess: course.price === 0,
@@ -453,32 +438,27 @@ export const getCourses = async (req, res, next) => {
       });
     }
 
-    const enrollments = await EnrollmentModel.find({
-      student: userId,
-    })
+    const enrollments = await EnrollmentModel.find({ student: userId })
       .select("course approvalStatus")
       .lean();
 
     const enrollmentMap = new Map();
-
     for (const e of enrollments) {
       enrollmentMap.set(String(e.course), e);
     }
 
     const finalCourses = courses.map((course) => {
       const enrollment = enrollmentMap.get(String(course._id));
-
       return {
         ...course,
         enrollment: enrollment || null,
         enrollmentId: enrollment?._id || null,
-        hasAccess:
-          enrollment?.approvalStatus === "accepted" || course.price === 0,
+        hasAccess: enrollment?.approvalStatus === "accepted" || course.price === 0,
       };
     });
 
     res.status(200).json({
-      source: cachedData ? "cache" : "db",
+      source: "db",
       data: finalCourses,
     });
   } catch (error) {
@@ -486,7 +466,6 @@ export const getCourses = async (req, res, next) => {
   }
 };
 
-// ================= GET SINGLE COURSE =================
 export const getCourse = async (req, res, next) => {
   try {
     const courseId = req.params.id;
@@ -496,27 +475,11 @@ export const getCourse = async (req, res, next) => {
       return res.status(400).json({ message: "Course ID is required" });
     }
 
-    const cacheKey = courseKey(courseId, userId);
-
-    const cachedCourse = await redis.get(cacheKey);
-
-    if (cachedCourse) {
-      return res.status(200).json({
-        source: "cache",
-        data:
-          typeof cachedCourse === "string"
-            ? JSON.parse(cachedCourse)
-            : cachedCourse,
-      });
-    }
-
     const course = await courseService.getCourseById(courseId, userId);
 
     if (!course) {
       return res.status(404).json({ message: "Course not found" });
     }
-
-    await redis.set(cacheKey, JSON.stringify(course), { ex: 3600 });
 
     return res.status(200).json({
       source: "db",
