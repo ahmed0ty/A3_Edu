@@ -15,6 +15,6 @@ const storage = new CloudinaryStorage({
 });
 
 export const instructorUpload = multer({
-  storage,
+  storage: multer.memoryStorage(),
   limits: { fileSize: 2 * 1024 * 1024 },
 });

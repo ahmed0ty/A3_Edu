@@ -179,23 +179,21 @@ export const requestInstructor = async (req, res, next) => {
     }
 
     // 🔥 لازم صورة
-    const file = req.file;
-    console.log("📁 File received:", file?.originalname);
+   const file = req.file;
+console.log("📁 File received:", file?.originalname);
 
+if (!file) {
+  return res.status(400).json({
+    message: "ID image is required",
+  });
+}
 
-    if (!file) {
-      return res.status(400).json({
-        message: "ID image is required",
-      });
-    }
+const base64Image = `data:${file.mimetype};base64,${file.buffer.toString("base64")}`;
 
-    // 🔥 update البيانات
-    user.instructorRequestStatus = "pending";
-
-    user.instructorRequestData = {
-      fullName: req.body.fullName || "",
-      idImage: req.file.path, // ✅ ده هو رابط Cloudinary
-    };
+user.instructorRequestData = {
+  fullName: req.body.fullName || "",
+  idImage: base64Image,
+};
 
     await user.save();
 
