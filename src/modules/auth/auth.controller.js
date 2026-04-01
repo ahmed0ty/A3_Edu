@@ -188,6 +188,7 @@ if (!file) {
   });
 }
 
+user.instructorRequestStatus = "pending";
 user.instructorRequestData = {
   fullName: req.body.fullName || "",
   idImage: "pending_upload",
