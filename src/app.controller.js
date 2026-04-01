@@ -88,7 +88,6 @@ export const bootstrap = async () => {
     cors({
       origin: [
         "http://localhost:5173",
-        "http://localhost:3000",
         "https://a3-edu-front-end.vercel.app",
       ],
       credentials: true,

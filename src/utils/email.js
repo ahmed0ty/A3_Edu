@@ -29,12 +29,8 @@
 // };
 
 
-
-
-
 import nodemailer from "nodemailer";
 
-// debug
 console.log("EMAIL:", process.env.EMAIL);
 console.log("EMAIL_PASS exists:", !!process.env.EMAIL_PASS);
 
@@ -52,13 +48,18 @@ const createTransporter = () => {
     },
   });
 };
+
 export const sendEmail = async ({ to, subject, html }) => {
   try {
     const transporter = createTransporter();
 
     if (!transporter) {
+      console.error("❌ Transporter is null — check EMAIL and EMAIL_PASS");
       return false;
     }
+
+    await transporter.verify();
+    console.log("✅ Transporter verified successfully");
 
     const info = await transporter.sendMail({
       from: `"Edu Platform" <${process.env.EMAIL}>`,
@@ -69,8 +70,9 @@ export const sendEmail = async ({ to, subject, html }) => {
 
     console.log("📨 Email sent:", info.messageId);
     return true;
+
   } catch (error) {
-    console.error("❌ Email failed but ignored:", error.message);
+    console.error("❌ Email error FULL:", error); // 🔥 هيبين السبب كامل
     return false;
   }
 };
