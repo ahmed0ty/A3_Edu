@@ -579,25 +579,9 @@ export const getMyCourses = async (req, res, next) => {
   try {
     const instructorId = req.user._id;
 
-    const cacheKey = `myCourses:${instructorId}`;
-
-    const cached = await redis.get(cacheKey);
-
-    if (cached) {
-      return res.json({
-        success: true,
-        source: "cache",
-        data: typeof cached === "string" ? JSON.parse(cached) : cached,
-      });
-    }
-
-    const courses = await CourseModel.find({
-      instructor: instructorId,
-    })
+    const courses = await CourseModel.find({ instructor: instructorId })
       .select("title description price thumbnail isPublished createdAt")
       .lean();
-
-    await redis.set(cacheKey, JSON.stringify(courses), { ex: 300 });
 
     res.json({
       success: true,
@@ -606,9 +590,6 @@ export const getMyCourses = async (req, res, next) => {
     });
   } catch (err) {
     console.error("❌ ERROR:", err.message);
-
-    res.status(500).json({
-      message: "Error fetching courses",
-    });
+    res.status(500).json({ message: "Error fetching courses" });
   }
 };
