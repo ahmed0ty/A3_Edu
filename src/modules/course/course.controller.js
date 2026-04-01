@@ -398,6 +398,7 @@ export const createCourse = async (req, res, next) => {
     const course = await courseService.createCourse(req.body, req.user._id);
 
     await clearCacheByPrefix("courses:");
+await clearCacheByPrefix("myCourses:");
 
     const io = getIO();
 
@@ -442,7 +443,7 @@ export const getCourses = async (req, res, next) => {
         .limit(limit)
         .lean();
 
-      await redis.set(cacheKey, JSON.stringify(courses), { ex: 3600 });
+      await redis.set(cacheKey, JSON.stringify(courses), { ex: 300 });
     }
 
     if (!userId) {
@@ -637,7 +638,7 @@ export const getMyCourses = async (req, res, next) => {
       .select("title description price thumbnail isPublished createdAt")
       .lean();
 
-    await redis.set(cacheKey, JSON.stringify(courses), { ex: 3600 });
+    await redis.set(cacheKey, JSON.stringify(courses), { ex: 300 });
 
     res.json({
       success: true,
