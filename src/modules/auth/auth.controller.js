@@ -5,6 +5,7 @@ import UserModel from "../../DB/models/user.model.js";
 import { getIO } from "../../../socket.js"; // عدّل المسار حسب مشروعك
 import { generateToken } from "../../utils/jwt.js";
 import { clearCacheByPrefix } from "../../utils/cache.js";
+import cloudinary from "../../config/cloudinary.js";
 // ================= REGISTER =================
 export const register = async (req, res, next) => {
   try {
@@ -154,6 +155,8 @@ export const refreshToken = async (req, res, next) => {
   }
 };
 
+
+
 export const requestInstructor = async (req, res, next) => {
   try {
     const userId = req.user._id;
@@ -164,48 +167,54 @@ export const requestInstructor = async (req, res, next) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // 🔥 لو instructor بالفعل
     if (user.role === "instructor") {
-      return res.status(400).json({
-        message: "You are already an instructor",
-      });
+      return res.status(400).json({ message: "You are already an instructor" });
     }
 
-    // 🔥 لو الطلب pending
     if (user.instructorRequestStatus === "pending") {
-      return res.status(400).json({
-        message: "Request already pending",
-      });
+      return res.status(400).json({ message: "Request already pending" });
     }
 
-    // 🔥 لازم صورة
-   const file = req.file;
-console.log("📁 File received:", file?.originalname);
+    const file = req.file;
+    console.log("📁 File received:", file?.originalname);
 
-if (!file) {
-  return res.status(400).json({
-    message: "ID image is required",
-  });
-}
+    if (!file) {
+      return res.status(400).json({ message: "ID image is required" });
+    }
 
-user.instructorRequestStatus = "pending";
-user.instructorRequestData = {
-  fullName: req.body.fullName || "",
-  idImage: "pending_upload",
-};
+    // ✅ رفع الصورة على Cloudinary يدوياً
+    const imageUrl = await new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        { folder: "instructor-requests" },
+        (error, result) => {
+          if (error) {
+            console.error("❌ Cloudinary upload error:", error);
+            reject(error);
+          } else {
+            console.log("✅ Cloudinary upload success:", result.secure_url);
+            resolve(result.secure_url);
+          }
+        }
+      );
+      stream.end(file.buffer);
+    });
+
+    user.instructorRequestStatus = "pending";
+    user.instructorRequestData = {
+      fullName: req.body.fullName || "",
+      idImage: imageUrl,
+    };
 
     await user.save();
 
-    // 🔥 SOCKET EMIT (المهم)
-  // 🔥 SOCKET EVENT
-const io = getIO();
-io.emit("user:updated", {
-  userId: user._id,
-  status: "instructor_request_pending",
-});
-io.emit("instructorRequest:new");
+    const io = getIO();
+    io.emit("user:updated", {
+      userId: user._id,
+      status: "instructor_request_pending",
+    });
+    io.emit("instructorRequest:new");
 
-await clearCacheByPrefix("users:");
+    await clearCacheByPrefix("users:");
 
     res.status(200).json({
       success: true,
