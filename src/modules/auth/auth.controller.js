@@ -188,11 +188,9 @@ if (!file) {
   });
 }
 
-const base64Image = `data:${file.mimetype};base64,${file.buffer.toString("base64")}`;
-
 user.instructorRequestData = {
   fullName: req.body.fullName || "",
-  idImage: base64Image,
+  idImage: "pending_upload",
 };
 
     await user.save();
