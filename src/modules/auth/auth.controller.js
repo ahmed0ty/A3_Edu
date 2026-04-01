@@ -65,12 +65,12 @@ export const login = async (req, res, next) => {
     const { accessToken, refreshToken, user } = await authService.login({ email, password });
 
     // 🍪 حفظ refresh token في HttpOnly cookie
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: false, // true في production
-      sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+ res.cookie("refreshToken", refreshToken, {
+  httpOnly: true,
+  secure: true,
+  sameSite: "none",
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+});
     
 
     res.status(200).json({

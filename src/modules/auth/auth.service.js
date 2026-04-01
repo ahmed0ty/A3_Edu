@@ -194,13 +194,15 @@ export const register = async (data, file) => {
     profileImage: file?.path || "",
   });
 
-  sendEmail({
-    to: email,
-    subject: "Confirm your email",
-    html: `<h2>Your OTP is: ${otp}</h2>`,
-  }).catch((error) => {
-    console.error("❌ Background email error:", error.message);
-  });
+sendEmail({
+  to: email,
+  subject: "Confirm your email",
+  html: `<h2>Your OTP is: ${otp}</h2>`,
+}).then((result) => {
+  console.log("📨 Email result:", result);
+}).catch((error) => {
+  console.error("❌ Background email error FULL:", error);
+});
 
   return {
     userId: user._id,
